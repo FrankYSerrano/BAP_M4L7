@@ -2,6 +2,7 @@ package com.example;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.By;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -13,19 +14,34 @@ public class LoginTest {
     @DataProvider(name = "loginData")
     public Object[][] loginData() {
         return new Object[][] {
-            {"standard_user", "secret_sauce"},
-            {"locked_out_user", "secret_sauce"},
-            {"problem_user", "secret_sauce"},
-            {"performance_glitch_user", "secret_sauce"},
-            {"error_user", "secret_sauce"},
-            {"visual_user", "secret_sauce"}
+            {"firefox", "standard_user", "secret_sauce"},
+            {"firefox", "locked_out_user", "secret_sauce"},
+            {"firefox", "problem_user", "secret_sauce"},
+            {"firefox", "performance_glitch_user", "secret_sauce"},
+            {"firefox", "error_user", "secret_sauce"},
+            {"firefox", "visual_user", "secret_sauce"},
+            {"chrome", "standard_user", "secret_sauce"},
+            {"chrome", "locked_out_user", "secret_sauce"},
+            {"chrome", "problem_user", "secret_sauce"},
+            {"chrome", "performance_glitch_user", "secret_sauce"},
+            {"chrome", "error_user", "secret_sauce"},
+            {"chrome", "visual_user", "secret_sauce"}
         };
     }
 
     @Test(dataProvider = "loginData")
-    public void testLogin(String username, String password) {
-        WebDriverManager.firefoxdriver().setup();
-        WebDriver driver = new FirefoxDriver();
+    public void testLogin(String browser, String username, String password) {
+        WebDriver driver = null;
+        if ("firefox".equalsIgnoreCase(browser)) {
+            WebDriverManager.firefoxdriver().setup();
+            driver = new FirefoxDriver();
+        } else if ("chrome".equalsIgnoreCase(browser)) {
+            WebDriverManager.chromedriver().setup();
+            driver = new ChromeDriver();
+        } else {
+            throw new IllegalArgumentException("Unsupported browser: " + browser);
+        }
+
         try {
             driver.get("https://www.saucedemo.com/");
             driver.findElement(By.id("user-name")).sendKeys(username);
@@ -41,14 +57,16 @@ public class LoginTest {
                 || "visual_user".equals(username)) {
                 Assert.assertEquals(currentUrl, 
                     "https://www.saucedemo.com/inventory.html", 
-                    "Login should succeed for: " + username);
+                    "Login should succeed for: " + username + " on " + browser);
             } else {
                 Assert.assertEquals(currentUrl, 
                     "https://www.saucedemo.com/", 
-                    "Login should fail for: " + username);
+                    "Login should fail for: " + username + " on " + browser);
             }
         } finally {
-            driver.quit();
+            if (driver != null) {
+                driver.quit();
+            }
         }
     }
 }
