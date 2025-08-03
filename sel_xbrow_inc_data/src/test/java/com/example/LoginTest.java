@@ -8,6 +8,11 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.testng.Assert;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class LoginTest {
 
@@ -41,6 +46,22 @@ public class LoginTest {
         }
     }
 
+    private void takeScreenshot(WebDriver driver, String browser, String username) {
+        File screenshotsDir = new File("screenshots");
+        if (!screenshotsDir.exists()) {
+            screenshotsDir.mkdir();
+        }
+        File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        String filename = String.format("screenshots/SShot_%s_%s_%s.png", browser, username, System.currentTimeMillis());
+        File destFile = new File(filename);
+        try {
+            Files.copy(screenshot.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+            Assert.fail("Failed to save screenshot: " + e.getMessage());
+        }
+    }
+
     @Test(dataProvider = "loginData")
     public void testLogin(String browser, String username, String password, String expectedUrl) {
         WebDriver driver = createWebDriver(browser);
@@ -54,6 +75,9 @@ public class LoginTest {
             String currentUrl = driver.getCurrentUrl();
             Assert.assertEquals(currentUrl, expectedUrl, 
                 "Login result for: " + username + " on " + browser);
+
+            // Take screenshot using reusable method
+            takeScreenshot(driver, browser, username);
         } finally {
             if (driver != null) {
                 driver.quit();
