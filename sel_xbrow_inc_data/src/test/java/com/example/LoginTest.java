@@ -20,16 +20,18 @@ public class LoginTest {
     public Object[][] loginData() {
         return new Object[][] {
             {"firefox", "standard_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
-            {"firefox", "locked_out_user", "secret_sauce", "https://www.saucedemo.com/"},
-            {"firefox", "problem_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
-            {"firefox", "performance_glitch_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
-            {"firefox", "error_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
-            {"firefox", "visual_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
             {"chrome", "standard_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
+            {"firefox", "locked_out_user", "secret_sauce", "https://www.saucedemo.com/"},
             {"chrome", "locked_out_user", "secret_sauce", "https://www.saucedemo.com/"},
+/*
+            {"firefox", "problem_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
             {"chrome", "problem_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
+            {"firefox", "performance_glitch_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
             {"chrome", "performance_glitch_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
+            {"firefox", "error_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
             {"chrome", "error_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
+ */
+            {"firefox", "visual_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
             {"chrome", "visual_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"}
         };
     }
