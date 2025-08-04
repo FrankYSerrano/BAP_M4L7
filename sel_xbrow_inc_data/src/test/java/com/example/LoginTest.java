@@ -6,6 +6,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.By;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterMethod;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.testng.Assert;
 import org.openqa.selenium.OutputType;
@@ -16,6 +18,10 @@ import java.nio.file.StandardCopyOption;
 
 public class LoginTest {
 
+    private WebDriver driver;
+    private String browser;
+    private String username;
+
     @DataProvider(name = "loginData")
     public Object[][] loginData() {
         return new Object[][] {
@@ -23,28 +29,29 @@ public class LoginTest {
             {"chrome", "standard_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
             {"firefox", "locked_out_user", "secret_sauce", "https://www.saucedemo.com/"},
             {"chrome", "locked_out_user", "secret_sauce", "https://www.saucedemo.com/"},
-/*
-            {"firefox", "problem_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
-            {"chrome", "problem_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
-            {"firefox", "performance_glitch_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
-            {"chrome", "performance_glitch_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
-            {"firefox", "error_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
-            {"chrome", "error_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
- */
             {"firefox", "visual_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"},
             {"chrome", "visual_user", "secret_sauce", "https://www.saucedemo.com/inventory.html"}
         };
     }
 
-    private WebDriver createWebDriver(String browser) {
+    @BeforeMethod
+    public void setUp(Object[] testData) {
+        browser = (String) testData[0];
         if ("firefox".equalsIgnoreCase(browser)) {
             WebDriverManager.firefoxdriver().setup();
-            return new FirefoxDriver();
+            driver = new FirefoxDriver();
         } else if ("chrome".equalsIgnoreCase(browser)) {
             WebDriverManager.chromedriver().setup();
-            return new ChromeDriver();
+            driver = new ChromeDriver();
         } else {
             throw new IllegalArgumentException("Unsupported browser: " + browser);
+        }
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
         }
     }
 
@@ -66,24 +73,16 @@ public class LoginTest {
 
     @Test(dataProvider = "loginData")
     public void testLogin(String browser, String username, String password, String expectedUrl) {
-        WebDriver driver = createWebDriver(browser);
+        this.username = username; // for screenshot naming
+        driver.get("https://www.saucedemo.com/");
+        driver.findElement(By.id("user-name")).sendKeys(username);
+        driver.findElement(By.id("password")).sendKeys(password);
+        driver.findElement(By.id("login-button")).click();
 
-        try {
-            driver.get("https://www.saucedemo.com/");
-            driver.findElement(By.id("user-name")).sendKeys(username);
-            driver.findElement(By.id("password")).sendKeys(password);
-            driver.findElement(By.id("login-button")).click();
+        String currentUrl = driver.getCurrentUrl();
+        Assert.assertEquals(currentUrl, expectedUrl,
+            "Login result for: " + username + " on " + browser);
 
-            String currentUrl = driver.getCurrentUrl();
-            Assert.assertEquals(currentUrl, expectedUrl, 
-                "Login result for: " + username + " on " + browser);
-
-            // Take screenshot using reusable method
-            takeScreenshot(driver, browser, username);
-        } finally {
-            if (driver != null) {
-                driver.quit();
-            }
-        }
+        takeScreenshot(driver, browser, username);
     }
 }
